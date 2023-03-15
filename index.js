@@ -14,6 +14,15 @@ function drawImage(image_id, canvas_id) {
 
 drawImage("image","img_rgb");
 
+function convertToGreyScale(canvas_id) {
+    const img_rgb = document.getElementById(canvas_id);
+    const context = img_rgb.getContext("2d");
+    const img_data = context.getImageData(0, 0, img_rgb.width, img_rgb.height);
+
+}
+
+convertToGreyScale("img_rgb");
+
 /*
 const img_rgb = cv.imread('image');
 const img_gray = new cv.Mat();
