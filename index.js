@@ -14,14 +14,39 @@ function drawImage(image_id, canvas_id) {
 
 drawImage("image","img_rgb");
 
-function convertToGreyScale(canvas_id) {
-    const img_rgb = document.getElementById(canvas_id);
-    const context = img_rgb.getContext("2d");
-    const img_data = context.getImageData(0, 0, img_rgb.width, img_rgb.height);
+function getPixel(img_data, index) {
+    const red = img_data[4*index];
+    const green = img_data[4*index + 1];
+    const blue = img_data[4*index + 2];
+    const alpha = img_data[4*index + 3];
+    return {red: red, green: green, blue: blue, alpha: alpha};
+}
+
+function setPixel()
+
+function getIndex(width, i, j) { return j * width + i; }
+
+function convertToGreyScale(rgb_canvas_id, grey_canvas_id) {
+    const rgb = document.getElementById(rgb_canvas_id);
+    const grey = document.getElementById(grey_canvas_id);
+    grey.width = rgb.width;
+    grey.height = rgb.height;
+
+    const rgb_context = img_rgb.getContext("2d");
+    const rgb_data = rgb_context.getImageData(0, 0, rgb.width, rgb.height);
+
+    for (let j = 0; j < rgb.height; j++) {
+        for (let i = 0; i < rgb.width; i++) {
+            const index = getIndex(rgb.width, i, j);
+            const pixel = getPixel(rgb_data, index);
+            const average = (pixel.red + pixel.blue + pixel.green) / 3;
+
+        }
+    }
 
 }
 
-convertToGreyScale("img_rgb");
+convertToGreyScale("img_rgb", "img_grey");
 
 /*
 const img_rgb = cv.imread('image');
