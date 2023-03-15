@@ -12,8 +12,6 @@ function drawImage(image_id, canvas_id) {
     context.drawImage(image, 0, 0);
 }
 
-drawImage("image","img_rgb");
-
 function getPixel(img_data, index) {
     const red = img_data[4*index];
     const green = img_data[4*index + 1];
@@ -22,31 +20,49 @@ function getPixel(img_data, index) {
     return {red: red, green: green, blue: blue, alpha: alpha};
 }
 
-function setPixel()
+function setPixel(img_data, index, pixel) {
+    img_data[4*index] = pixel.red;
+    img_data[4*index + 1] = pixel.green;
+    img_data[4*index + 2] = pixel.blue;
+    img_data[4*index + 3] = pixel.alpha;
+}
 
 function getIndex(width, i, j) { return j * width + i; }
 
 function convertToGreyScale(rgb_canvas_id, grey_canvas_id) {
     const rgb = document.getElementById(rgb_canvas_id);
     const grey = document.getElementById(grey_canvas_id);
-    grey.width = rgb.width;
-    grey.height = rgb.height;
+    const w = rgb.width;
+    const h = rgb.height;
+    grey.width = w;
+    grey.height = h;
 
-    const rgb_context = img_rgb.getContext("2d");
-    const rgb_data = rgb_context.getImageData(0, 0, rgb.width, rgb.height);
+    const rgb_context = rgb.getContext("2d");
+    const rgb_data = rgb_context.getImageData(0, 0, w, h).data;
+
+    const grey_context = grey.getContext("2d");
+    const grey_data = grey_context.getImageData(0, 0, w, h).data;
 
     for (let j = 0; j < rgb.height; j++) {
         for (let i = 0; i < rgb.width; i++) {
             const index = getIndex(rgb.width, i, j);
-            const pixel = getPixel(rgb_data, index);
-            const average = (pixel.red + pixel.blue + pixel.green) / 3;
 
+            const rgb_pixel = getPixel(rgb_data, index);
+            const mean = (rgb_pixel.red + rgb_pixel.blue + rgb_pixel.green) / 3;
+
+            const grey_pixel = {red: mean, blue: mean, green: mean, 
+                alpha: rgb_pixel.alpha};
+            setPixel(grey_data, index, grey_pixel);
         }
     }
 
 }
 
+drawImage("image","img_rgb");
+drawImage("image","img_grey");
 convertToGreyScale("img_rgb", "img_grey");
+
+
 
 /*
 const img_rgb = cv.imread('image');
