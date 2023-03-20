@@ -20,11 +20,10 @@ function getPixel(img_data, index) {
     return {red: red, green: green, blue: blue, alpha: alpha};
 }
 
-function setPixel(img_data, index, pixel) {
-    img_data[4*index] = pixel.red;
-    img_data[4*index + 1] = pixel.green;
-    img_data[4*index + 2] = pixel.blue;
-    img_data[4*index + 3] = pixel.alpha;
+function setPixel(img_context, i, j, pixel) {
+    img_context.fillStyle = "rgba(" + pixel.red + "," + pixel.green + "," + 
+        pixel.blue + "," + (pixel.alpha / 255) + ")";
+    img_context.fillRect(i,j,1,1);
 }
 
 function getIndex(width, i, j) { return j * width + i; }
@@ -41,22 +40,28 @@ function convertToGreyScale(rgb_canvas_id, grey_canvas_id) {
     const rgb_data = rgb_context.getImageData(0, 0, w, h).data;
 
     const grey_context = grey.getContext("2d");
-    const grey_data = grey_context.getImageData(0, 0, w, h).data;
 
-    for (let j = 0; j < rgb.height; j++) {
-        for (let i = 0; i < rgb.width; i++) {
-            const index = getIndex(rgb.width, i, j);
+    for (let j = 0; j < h; j++) {
+        for (let i = 0; i < w; i++) {
+            const index = getIndex(w, i, j);
 
             const rgb_pixel = getPixel(rgb_data, index);
             const mean = (rgb_pixel.red + rgb_pixel.blue + rgb_pixel.green) / 3;
 
             const grey_pixel = {red: mean, blue: mean, green: mean, 
                 alpha: rgb_pixel.alpha};
-            setPixel(grey_data, index, grey_pixel);
+
+            setPixel(grey_context, i, j, grey_pixel);
         }
     }
 
 }
+
+// morphological operation: keep everything that is a round circle shape.
+// discard all else.
+
+// select notes only
+
 
 drawImage("image","img_rgb");
 drawImage("image","img_grey");
