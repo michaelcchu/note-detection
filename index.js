@@ -12,7 +12,8 @@ function drawImage(image_id, canvas_id) {
     context.drawImage(image, 0, 0);
 }
 
-function getPixel(img_data, index) {
+function getPixel(img_data, w, i, j) {
+    const index = getIndex(w, i, j);
     const red = img_data[4*index];
     const green = img_data[4*index + 1];
     const blue = img_data[4*index + 2];
@@ -43,9 +44,7 @@ function convertToGreyScale(rgb_canvas_id, grey_canvas_id) {
 
     for (let j = 0; j < h; j++) {
         for (let i = 0; i < w; i++) {
-            const index = getIndex(w, i, j);
-
-            const rgb_pixel = getPixel(rgb_data, index);
+            const rgb_pixel = getPixel(rgb_data, w, i, j);
             const mean = (rgb_pixel.red + rgb_pixel.blue + rgb_pixel.green) / 3;
 
             const grey_pixel = {red: mean, blue: mean, green: mean, 
