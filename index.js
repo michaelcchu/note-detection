@@ -12,6 +12,8 @@ function drawImage(image_id, canvas_id) {
     context.drawImage(image, 0, 0);
 }
 
+function getIndex(width, i, j) { return j * width + i; }
+
 function getPixel(img_data, w, i, j) {
     const index = getIndex(w, i, j);
     const red = img_data[4*index];
@@ -26,8 +28,6 @@ function setPixel(img_context, i, j, pixel) {
         pixel.blue + "," + (pixel.alpha / 255) + ")";
     img_context.fillRect(i,j,1,1);
 }
-
-function getIndex(width, i, j) { return j * width + i; }
 
 function convertToGreyScale(rgb_canvas_id, grey_canvas_id) {
     const rgb = document.getElementById(rgb_canvas_id);
@@ -53,7 +53,68 @@ function convertToGreyScale(rgb_canvas_id, grey_canvas_id) {
             setPixel(grey_context, i, j, grey_pixel);
         }
     }
+}
 
+function convertToBlackAndWhite(source_canvas_id, output_canvas_id) {
+    const source = document.getElementById(source_canvas_id);
+    const output = document.getElementById(output_canvas_id);
+    const w = source.width;
+    const h = source.height;
+    output.width = w;
+    output.height = h;
+
+    const source_context = source.getContext("2d");
+    const source_data = source_context.getImageData(0, 0, w, h).data;
+
+    const output_context = output.getContext("2d");
+
+    for (let j = 0; j < h; j++) {
+        for (let i = 0; i < w; i++) {
+            // i,j is the upper left corner
+            const source_pixel = getPixel(source_data, w, i, j);
+            const mean = (source_pixel.red + source_pixel.blue + 
+                source_pixel.green) / 3;
+
+            // check if greater than or less than 127
+            let output_pixel;
+            if (mean > 127) {
+                output_pixel = {red: 255, blue: 255, green: 255, alpha: 
+                    source_pixel.alpha};
+            } else {
+                output_pixel = {red: 0, blue: 0, green: 0, alpha: 
+                    source_pixel.alpha}
+            }
+
+            setPixel(output_context, i, j, output_pixel);
+        }
+    }
+}
+
+function findNotes(source_canvas_id, output_canvas_id) {
+    const source = document.getElementById(source_canvas_id);
+    const output = document.getElementById(output_canvas_id);
+    const w = source.width;
+    const h = source.height;
+    output.width = w;
+    output.height = h;
+
+    const source_context = source.getContext("2d");
+    const source_data = source_context.getImageData(0, 0, w, h).data;
+
+    const output_context = output.getContext("2d");
+
+    for (let j = 0; j < h; j++) {
+        for (let i = 0; i < w; i++) {
+            // i,j is the upper left corner
+            const source_pixel = getPixel(source_data, w, i, j);
+            const mean = (rgb_pixel.red + rgb_pixel.blue + rgb_pixel.green) / 3;
+
+            const grey_pixel = {red: mean, blue: mean, green: mean, 
+                alpha: rgb_pixel.alpha};
+
+            setPixel(grey_context, i, j, grey_pixel);
+        }
+    }
 }
 
 // morphological operation: keep everything that is a round circle shape.
@@ -61,11 +122,10 @@ function convertToGreyScale(rgb_canvas_id, grey_canvas_id) {
 
 // select notes only
 
-
 drawImage("image","img_rgb");
 drawImage("image","img_grey");
-convertToGreyScale("img_rgb", "img_grey");
-
+//convertToGreyScale("img_rgb", "img_grey");
+convertToBlackAndWhite("img_rgb","img_grey");
 
 
 /*
