@@ -90,6 +90,48 @@ function convertToBlackAndWhite(source_canvas_id, output_canvas_id) {
     }
 }
 
+// assumes we are working with black-and-white image
+// checks if there is a note with upper-left corner at (i, j)
+function checkIfNote(source_data, w, h, start_x, start_y) {
+    // 1 means "must be black"
+    // 0 means "i don't care what it is"
+    // "note" is a note template / kernel
+    const note = [ 
+        [0, 0, 1, 1, 0, 0], 
+        [0, 1, 0, 0, 1, 0], 
+        [1, 0, 0, 0, 0, 1], 
+        [1, 0, 0, 0, 0, 1], 
+        [0, 1, 0, 0, 1, 0], 
+        [0, 0, 1, 1, 0, 0]
+    ];
+    const note_width = note[0].length;
+    const note_height = note.length;
+
+    // number of "1s" in note
+    const values = note.reduce((a, b) => a.concat(b), []);
+    const sum = values.reduce((a, b) => a + b, 0);
+    let ones = 0;
+
+    if (start_x + note_width > w) {return false;}
+    if (start_y + note_height > h) {return false;}
+
+    for (let j = 0; j < note_height; j++) {
+        for (let i = 0; i < note_width; i++) {
+            const pixel = getPixel(source_data, w, start_x + i, start_y + j);
+            let pixel_value = 0;
+            if (pixel.red === 0) {
+                pixel_value = 1;
+            }
+            const note_pixel_value = note[i][j];
+            const product = pixel_value * note_pixel_value;
+            ones += product;
+        }
+    }
+
+    return (ones === sum);
+}
+
+// i'm assuming that source_canvas is black and white
 function findNotes(source_canvas_id, output_canvas_id) {
     const source = document.getElementById(source_canvas_id);
     const output = document.getElementById(output_canvas_id);
@@ -106,13 +148,13 @@ function findNotes(source_canvas_id, output_canvas_id) {
     for (let j = 0; j < h; j++) {
         for (let i = 0; i < w; i++) {
             // i,j is the upper left corner
-            const source_pixel = getPixel(source_data, w, i, j);
-            const mean = (rgb_pixel.red + rgb_pixel.blue + rgb_pixel.green) / 3;
-
-            const grey_pixel = {red: mean, blue: mean, green: mean, 
-                alpha: rgb_pixel.alpha};
-
-            setPixel(grey_context, i, j, grey_pixel);
+            const noteDetected = checkIfNote(source_data, w, h, i, j);
+            if (noteDetected) {
+                console.log(i,j);
+                const marker_pixel = {red: 255, blue: 0, green: 0, 
+                    alpha: 255};
+                setPixel(output_context, i, j, marker_pixel);            
+            }
         }
     }
 }
@@ -126,7 +168,7 @@ drawImage("image","img_rgb");
 drawImage("image","img_grey");
 //convertToGreyScale("img_rgb", "img_grey");
 convertToBlackAndWhite("img_rgb","img_grey");
-
+findNotes("img_grey","notes");
 
 /*
 const img_rgb = cv.imread('image');
