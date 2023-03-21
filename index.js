@@ -29,6 +29,25 @@ function setPixel(img_context, i, j, pixel) {
     img_context.fillRect(i,j,1,1);
 }
 
+function drawRectangle(output_context, start_x, start_y) {
+    const marker_pixel = {red: 255, blue: 0, green: 0, 
+        alpha: 255};
+
+    // draw four lines
+
+    for (let j of [0, note_height]) {
+        for (let i = 0; i < note_width; i++) {
+            setPixel(output_context, start_x + i, start_y + j, marker_pixel);
+        }
+    }
+
+    for (let i of [0, note_width]) {
+        for (let j = 0; j < note_height; j++) {
+            setPixel(output_context, start_x + i, start_y + j, marker_pixel);
+        }
+    }
+}
+
 function convertToGreyScale(rgb_canvas_id, grey_canvas_id) {
     const rgb = document.getElementById(rgb_canvas_id);
     const grey = document.getElementById(grey_canvas_id);
@@ -90,23 +109,29 @@ function convertToBlackAndWhite(source_canvas_id, output_canvas_id) {
     }
 }
 
+// 1 means "must be black"
+// 0 means "i don't care what it is"
+// "note" is a note template / kernel
+const note = [
+    [0,0,0,0,1,1,1,1,1,1,1,0,0],
+    [0,0,0,1,0,0,0,0,0,0,0,1,0],
+    [0,0,1,0,0,0,0,0,0,0,0,0,1],
+    [0,1,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,1,0],
+    [1,0,0,0,0,0,0,0,0,0,1,0,0],
+    [1,0,0,0,0,0,0,0,0,1,0,0,0],
+    [1,1,1,1,1,1,1,1,1,0,0,0,0]
+];
+
+const note_width = note[0].length;
+const note_height = note.length;
+
 // assumes we are working with black-and-white image
 // checks if there is a note with upper-left corner at (i, j)
 function checkIfNote(source_data, w, h, start_x, start_y) {
-    // 1 means "must be black"
-    // 0 means "i don't care what it is"
-    // "note" is a note template / kernel
-    const note = [ 
-        [0, 0, 1, 1, 0, 0], 
-        [0, 1, 0, 0, 1, 0], 
-        [1, 0, 0, 0, 0, 1], 
-        [1, 0, 0, 0, 0, 1], 
-        [0, 1, 0, 0, 1, 0], 
-        [0, 0, 1, 1, 0, 0]
-    ];
-    const note_width = note[0].length;
-    const note_height = note.length;
-
     // number of "1s" in note
     const values = note.reduce((a, b) => a.concat(b), []);
     const sum = values.reduce((a, b) => a + b, 0);
@@ -122,7 +147,7 @@ function checkIfNote(source_data, w, h, start_x, start_y) {
             if (pixel.red === 0) {
                 pixel_value = 1;
             }
-            const note_pixel_value = note[i][j];
+            const note_pixel_value = note[j][i];
             const product = pixel_value * note_pixel_value;
             ones += product;
         }
@@ -150,10 +175,8 @@ function findNotes(source_canvas_id, output_canvas_id) {
             // i,j is the upper left corner
             const noteDetected = checkIfNote(source_data, w, h, i, j);
             if (noteDetected) {
-                console.log(i,j);
-                const marker_pixel = {red: 255, blue: 0, green: 0, 
-                    alpha: 255};
-                setPixel(output_context, i, j, marker_pixel);            
+                //console.log(i,j);
+                drawRectangle(output_context, i, j);      
             }
         }
     }
