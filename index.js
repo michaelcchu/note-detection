@@ -122,8 +122,8 @@ const note = [
     [1,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,1,0],
     [1,0,0,0,0,0,0,0,0,0,1,0,0],
-    [1,0,0,0,0,0,0,0,0,1,0,0,0],
-    [1,1,1,1,1,1,1,1,1,0,0,0,0]
+    [0,1,0,0,0,0,0,0,0,1,0,0,0],
+    [0,0,1,1,1,1,1,1,1,0,0,0,0]
 ];
 
 const note_width = note[0].length;
@@ -153,7 +153,9 @@ function checkIfNote(source_data, w, h, start_x, start_y) {
         }
     }
 
-    return (ones === sum);
+    const threshold = 0.9;
+
+    return (ones >= threshold*sum);
 }
 
 // i'm assuming that source_canvas is black and white
